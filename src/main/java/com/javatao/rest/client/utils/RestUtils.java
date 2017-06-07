@@ -94,11 +94,12 @@ public abstract class RestUtils {
                 args.put("header", hadr);
             }
             String requestBody = req.getRequestBody();
-            Map<?, ?> map = JSON.parseObject(requestBody, Map.class);
-            if (map.containsKey("xml") && map.size() == 1) {
-                if (args.containsKey("xml")) {
-                    requestBody = args.get("xml").toString();
-                }
+            Map<?, ?> map = new HashMap<>();
+            if (!requestBody.startsWith("[")) {
+                map = JSON.parseObject(requestBody, Map.class);
+            }
+            if (map.containsKey("_xml") && map.size() == 1) {
+                requestBody = map.values().iterator().next().toString();
             }
             Response response = null;
             String url = req.getUrl();
@@ -162,21 +163,16 @@ public abstract class RestUtils {
                             }
                         }
                         entity = builder.build();
-                    }else{
-                        entity =  new StringEntity(requestBody, ContentType.create(contentType, req.getChareset()));
+                    } else {
+                        entity = new StringEntity(requestBody, ContentType.create(contentType, req.getChareset()));
                     }
                     Request request = null;
-                    // if ("post".equalsIgnoreCase(method)) {
-                    // request = Request.Post(url).body(entity);
-                    // } else if ("delete".equalsIgnoreCase(method)) {
-                    // request = Request.Delete(url).body(entity);
-                    // }
                     Method methodPoxy = Request.class.getMethod(method, String.class);
                     Object invoke = methodPoxy.invoke(null, url);
                     if (invoke instanceof Request) {
                         request = (Request) invoke;
                         long length = entity.getContentLength();
-                        if(length>2){
+                        if (length > 2) {
                             request.body(entity);
                         }
                     }
@@ -329,7 +325,10 @@ class RestRequest {
     }
 
     public String getRequestBody() {
-        return requestBody;
+        if (requestBody == null) {
+            return "{}";
+        }
+        return requestBody.trim();
     }
 
     public void setRequestBody(String requestBody) {
