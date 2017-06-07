@@ -27,7 +27,7 @@
         <developerConnection>
             scm:git:https://github.com/lftao/restclient.git
         </developerConnection>
-        <url>https://github.com/dingey/jdbc-mapper</url>
+        <url>https://github.com/lftao/restclient</url>
         <tag>0.0.1</tag>
     </scm>
     <distributionManagement>
