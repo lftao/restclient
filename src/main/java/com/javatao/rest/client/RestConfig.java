@@ -22,11 +22,38 @@ public class RestConfig {
         init(apiClass, "/");
     }
 
+    /**
+     * 获取实例
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板路径
+     * @return 实例
+     */
+    public static <T> T getBean(Class<T> apiClass) {
+        return getBean(apiClass, "/");
+    }
+
+    /**
+     * 获取实例
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板路径
+     * @return 实例
+     */
+    public static <T> T getBean(Class<T> apiClass, String basedir) {
+        if (apiClass.isInterface()) {
+            return (T) Proxy.newProxyInstance(RestConfig.class.getClassLoader(), new Class<?>[] { apiClass }, new IfaceProxy(basedir));
+        } else {
+            throw new RuntimeException(apiClass.getName() + "is not isInterface");
+        }
+    }
 
     /**
      * 初始化参数 ;
-     * 
-     * @return
      */
     public static void init(Class<?> apiClass, String basedir) {
         Field[] fields = apiClass.getDeclaredFields();
