@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import com.alibaba.fastjson.JSON;
 import com.javatao.rest.client.annotations.Param;
 import com.javatao.rest.client.exception.ExceptionUtil;
+import com.javatao.rest.client.utils.FkUtils;
 import com.javatao.rest.client.utils.RestUtils;
 
 /**
@@ -50,7 +51,8 @@ public class IfaceProxy implements InvocationHandler, Serializable {
      * 获取模板名
      * 
      * @param method
-     * @return
+     *            method
+     * @return 模板名字
      */
     private String getTemplateName(Method method) {
         String templateName = basedir + method.getDeclaringClass().getSimpleName() + "/" + method.getName() + ".json";
@@ -62,8 +64,10 @@ public class IfaceProxy implements InvocationHandler, Serializable {
      * 参数转换为Map
      * 
      * @param method
+     *            method
      * @param args
-     * @return
+     *            参数
+     * @return 结果
      */
     private Map<String, Object> changeToMap(Method method, Object[] args) {
         Map<String, Object> paramMap = new HashMap<>();
@@ -90,6 +94,10 @@ public class IfaceProxy implements InvocationHandler, Serializable {
 
     /**
      * 判空
+     * 
+     * @param dir
+     *            目录
+     * @return 结果
      */
     public static boolean isBlank(String dir) {
         if (dir == null || "".equals(dir.trim())) {
@@ -98,11 +106,12 @@ public class IfaceProxy implements InvocationHandler, Serializable {
         return false;
     }
 
-    public IfaceProxy() {
-        super();
-        logger.info("init WxProxy");
-    }
-
+    /**
+     * 结果
+     * 
+     * @param basedir
+     *            目录
+     */
     public IfaceProxy(String basedir) {
         super();
         logger.info("init RestProxy basedir:" + basedir);
@@ -112,5 +121,7 @@ public class IfaceProxy implements InvocationHandler, Serializable {
             }
         }
         this.basedir = basedir;
+        // 添加通用文件
+        FkUtils.include(basedir);
     }
 }

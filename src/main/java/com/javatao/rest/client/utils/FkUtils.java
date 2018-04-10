@@ -35,7 +35,6 @@ public final class FkUtils {
      * 字符串缓存
      */
     private static StringTemplateLoader stringTemplateLoader = new StringTemplateLoader();
-
     static {
         try {
             configuration.setClassForTemplateLoading(FkUtils.class, "/");
@@ -128,7 +127,8 @@ public final class FkUtils {
      * 调用用模板明
      * 
      * @param templatePathName
-     * @return
+     *            模板路径
+     * @return 内容
      */
     public static String processByPathName(String templatePathName) {
         return processByPathName(templatePathName, null);
@@ -141,7 +141,7 @@ public final class FkUtils {
      *            模板名字
      * @param args
      *            参数
-     * @return
+     * @return 内容
      */
     public static String processByPathName(String templatePathName, Map<String, Object> args) {
         try {
@@ -157,7 +157,7 @@ public final class FkUtils {
      *            模板字符串
      * @param args
      *            参数
-     * @return
+     * @return 内容
      */
     public static String process(String templateString, Map<String, Object> args) {
         try {
@@ -179,9 +179,13 @@ public final class FkUtils {
      * 设置全局参数
      * 
      * @param name
+     *            名字
      * @param value
+     *            值
      * @param env
+     *            环境变量
      * @throws TemplateException
+     *             TemplateException
      */
     public static void setVariable(String name, Object value, Environment env) throws TemplateException {
         if (value instanceof TemplateModel) {
@@ -195,8 +199,10 @@ public final class FkUtils {
      * 拿到静态Class的Model
      * 
      * @param className
-     * @return
+     *            类路径
+     * @return TemplateModel
      * @throws TemplateModelException
+     *             TemplateException
      */
     public static TemplateModel useClass(String className) throws TemplateModelException {
         BeansWrapper wrapper = (BeansWrapper) configuration.getObjectWrapper();
@@ -208,8 +214,10 @@ public final class FkUtils {
      * 拿到目标对象的model
      * 
      * @param target
-     * @return
+     *            目标
+     * @return TemplateModel
      * @throws TemplateModelException
+     *             TemplateModelException
      */
     public static TemplateModel useObjectModel(Object target) throws TemplateModelException {
         ObjectWrapper wrapper = configuration.getObjectWrapper();
@@ -221,9 +229,12 @@ public final class FkUtils {
      * 拿到目标对象某个方法的Model
      * 
      * @param target
+     *            目标
      * @param methodName
-     * @return
+     *            方法名
+     * @return TemplateModel
      * @throws TemplateModelException
+     *             TemplateModelException
      */
     public static TemplateModel useObjectMethod(Object target, String methodName) throws TemplateModelException {
         TemplateHashModel model = (TemplateHashModel) useObjectModel(target);

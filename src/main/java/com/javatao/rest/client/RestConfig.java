@@ -6,17 +6,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.javatao.rest.client.proxy.IfaceProxy;
-import com.javatao.rest.client.utils.FkUtils;
 
 /**
  * @author TLF
  */
 public class RestConfig {
     /**
-     * 初始化参数 <br/>
      * basedir : default /
+     * 初始化参数 
      * 
-     * @return
+     * @param apiClass
+     *            接口类
      */
     public static void init(Class<?> apiClass) {
         init(apiClass, "/");
@@ -27,9 +27,7 @@ public class RestConfig {
      * 
      * @param apiClass
      *            接口类
-     * @param basedir
-     *            模板路径
-     * @return 实例
+     * @return T 实例
      */
     public static <T> T getBean(Class<T> apiClass) {
         return getBean(apiClass, "/");
@@ -42,8 +40,9 @@ public class RestConfig {
      *            接口类
      * @param basedir
      *            模板路径
-     * @return 实例
+     * @return T 实例
      */
+    @SuppressWarnings("unchecked")
     public static <T> T getBean(Class<T> apiClass, String basedir) {
         if (apiClass.isInterface()) {
             return (T) Proxy.newProxyInstance(RestConfig.class.getClassLoader(), new Class<?>[] { apiClass }, new IfaceProxy(basedir));
@@ -54,6 +53,11 @@ public class RestConfig {
 
     /**
      * 初始化参数 ;
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板目录
      */
     public static void init(Class<?> apiClass, String basedir) {
         Field[] fields = apiClass.getDeclaredFields();
@@ -77,7 +81,5 @@ public class RestConfig {
                 e.printStackTrace();
             }
         }
-        // 添加通用文件
-        FkUtils.include(basedir);
     }
 }

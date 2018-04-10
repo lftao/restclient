@@ -36,6 +36,9 @@ public abstract class RestUtils {
     private static final Integer connectTimeout = 1000 * 15;
     private static final Integer socketTimeout = 1000 * 60 * 20;
 
+    static{
+        HttpsUtils.init();
+    }
     @SuppressWarnings("unchecked")
     private static void addRestComm(Request request, Map<String, Object> args) {
         request.connectTimeout(connectTimeout);
@@ -56,17 +59,21 @@ public abstract class RestUtils {
         return doExe(templatePathNames, new HashMap<String, Object>());
     }
 
-    @SuppressWarnings("unchecked")
     public static String doExe(String templatePathNames, Map<String, Object> args) {
-        logger.info("### doExe args" + args);
         String s = FkUtils.processByPathName(templatePathNames, args);
-        RestRequest req = JSON.parseObject(s, RestRequest.class);
+        return doExeString(s, args);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String doExeString(String templateContent, Map<String, Object> args) {
+        logger.info("### doExe args" + args);
+        RestRequest req = JSON.parseObject(templateContent, RestRequest.class);
         try {
             String contentType = req.getContentType();
             if (contentType.contains("xml")) {
-                logger.info("### doExe " + s);
+                logger.info("### doExe " + templateContent);
             } else {
-                logger.info("### doExe " + jsonFormat(s));
+                logger.info("### doExe " + jsonFormat(templateContent));
             }
             ResponseHandler<Object> handler = null;
             if (req.getCallblack() != null) {
@@ -224,6 +231,8 @@ public abstract class RestUtils {
 
     /**
      * 得到格式化json数据
+     * @param jsonStr 字符串
+     * @return 格式化后字符
      */
     public static String jsonFormat(String jsonStr) {
         int level = 0;
