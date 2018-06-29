@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -56,7 +57,11 @@ public final class FkUtils {
         try {
             Class<?> class1 = FkUtils.class;
             String path = include + "/include/";
-            URI url = class1.getResource(path).toURI();
+            URL resource = class1.getResource(path);
+            if (resource == null) {
+                return;
+            }
+            URI url = resource.toURI();
             File fileInclude = new File(url);
             if (fileInclude.exists()) {
                 for (File file : fileInclude.listFiles()) {

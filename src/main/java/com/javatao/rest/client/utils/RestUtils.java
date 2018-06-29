@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +22,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
 
@@ -194,7 +194,11 @@ public abstract class RestUtils {
                 throw new RuntimeException("response is null  ");
             }
             if (!req.getAsync()) {
-                String result = response.returnContent().asString(Charset.forName(req.getChareset()));
+                //String result = response.returnContent().asString(Charset.forName(req.getChareset()));
+                HttpResponse returnResponse = response.returnResponse();
+                logger.info("HttpResponse status:"+returnResponse.getStatusLine());
+                HttpEntity entity = returnResponse.getEntity();
+                String result =  EntityUtils.toString(entity, req.getChareset());
                 logger.info(result);
                 String splitKey = req.getResponseSplitKey();
                 if (isNotBlank(splitKey)) {
