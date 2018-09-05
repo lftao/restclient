@@ -16,6 +16,7 @@ import com.javatao.rest.client.annotations.Param;
 import com.javatao.rest.client.exception.ExceptionUtil;
 import com.javatao.rest.client.utils.FkUtils;
 import com.javatao.rest.client.utils.RestUtils;
+import com.javatao.rest.client.vo.ApiResponse;
 
 /**
  * 代理处理类
@@ -32,12 +33,19 @@ public class IfaceProxy implements InvocationHandler, Serializable {
         try {
             String templateName = getTemplateName(method);
             Map<String, Object> paramsMap = changeToMap(method, args);
-            String resutl = RestUtils.doExe(templateName, paramsMap);
+            Map<String, String> responseHeader = new HashMap<>();
+            String resutl = RestUtils.doExe(templateName, paramsMap,responseHeader);
             if (isBlank(resutl)) {
                 return null;
             }
             Class<?> returnType = method.getReturnType();
             if (returnType.isAssignableFrom(String.class)) {
+                return resutl;
+            }
+            if(returnType.isAssignableFrom(ApiResponse.class)){
+                ApiResponse api = new ApiResponse();
+                api.setBody(resutl);
+                api.setHeader(responseHeader);
                 return resutl;
             }
             return JSON.parseObject(resutl, returnType);

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -35,10 +36,10 @@ public abstract class RestUtils {
     private static final Log logger = LogFactory.getLog(RestUtils.class);
     private static final Integer connectTimeout = 1000 * 15;
     private static final Integer socketTimeout = 1000 * 60 * 20;
-
-    static{
+    static {
         HttpsUtils.init();
     }
+
     @SuppressWarnings("unchecked")
     private static void addRestComm(Request request, Map<String, Object> args) {
         request.connectTimeout(connectTimeout);
@@ -56,16 +57,16 @@ public abstract class RestUtils {
     }
 
     public static String doExe(String templatePathNames) {
-        return doExe(templatePathNames, new HashMap<String, Object>());
+        return doExe(templatePathNames, new HashMap<String, Object>(), new HashMap<String, String>());
     }
 
-    public static String doExe(String templatePathNames, Map<String, Object> args) {
+    public static String doExe(String templatePathNames, Map<String, Object> args, Map<String, String> responseHeader) {
         String s = FkUtils.processByPathName(templatePathNames, args);
-        return doExeString(s, args);
+        return doExeString(s, args, responseHeader);
     }
 
     @SuppressWarnings("unchecked")
-    public static String doExeString(String templateContent, Map<String, Object> args) {
+    public static String doExeString(String templateContent, Map<String, Object> args, Map<String, String> responseHeader) {
         logger.info("### doExe args" + args);
         RestRequest req = JSON.parseObject(templateContent, RestRequest.class);
         try {
@@ -194,11 +195,13 @@ public abstract class RestUtils {
                 throw new RuntimeException("response is null  ");
             }
             if (!req.getAsync()) {
-                //String result = response.returnContent().asString(Charset.forName(req.getChareset()));
+                // String result = response.returnContent().asString(Charset.forName(req.getChareset()));
                 HttpResponse returnResponse = response.returnResponse();
-                logger.info("HttpResponse status:"+returnResponse.getStatusLine());
+                logger.info("HttpResponse status:" + returnResponse.getStatusLine());
+                //返回头信息
+                responseHeader.putAll(getResponseHeader(returnResponse));
                 HttpEntity entity = returnResponse.getEntity();
-                String result =  EntityUtils.toString(entity, req.getChareset());
+                String result = EntityUtils.toString(entity, req.getChareset());
                 logger.info(result);
                 String splitKey = req.getResponseSplitKey();
                 if (isNotBlank(splitKey)) {
@@ -234,8 +237,30 @@ public abstract class RestUtils {
     }
 
     /**
+     * 添加返回头
+     * 
+     * @param returnResponse
+     *            返回体
+     * @return headers Map
+     */
+    private static Map<String, String> getResponseHeader(HttpResponse returnResponse) {
+        Map<String, String> responseHeader = new HashMap<>();
+        Header[] headers = returnResponse.getAllHeaders();
+        if (headers != null) {
+            for (Header hdr : headers) {
+                String value = hdr.getValue();
+                String name = hdr.getName();
+                responseHeader.put(name, value);
+            }
+        }
+        return responseHeader;
+    }
+
+    /**
      * 得到格式化json数据
-     * @param jsonStr 字符串
+     * 
+     * @param jsonStr
+     *            字符串
      * @return 格式化后字符
      */
     public static String jsonFormat(String jsonStr) {
