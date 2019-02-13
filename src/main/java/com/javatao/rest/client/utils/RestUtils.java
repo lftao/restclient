@@ -26,6 +26,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
+import com.javatao.rest.client.vo.RestRequest;
 
 /**
  * REST请求模板调用
@@ -36,12 +37,9 @@ public abstract class RestUtils {
     private static final Log logger = LogFactory.getLog(RestUtils.class);
     private static final Integer connectTimeout = 1000 * 15;
     private static final Integer socketTimeout = 1000 * 60 * 20;
-    static {
-        HttpsUtils.init();
-    }
 
     @SuppressWarnings("unchecked")
-    private static void addRestComm(Request request, Map<String, Object> args) {
+    private static void addRestComm(Request request, RestRequest req, Map<String, Object> args) {
         request.connectTimeout(connectTimeout);
         request.userAgent("Mozilla");
         request.socketTimeout(socketTimeout);
@@ -54,6 +52,18 @@ public abstract class RestUtils {
                 }
             }
         }
+        // 拓展参数
+        Map<String, Object> config = req.getConfig();
+        if (config != null) {
+            Object ctime = config.get("connectTimeout");
+            Object stime = config.get("socketTimeout");
+            if (ctime != null) {
+                request.connectTimeout(Integer.valueOf(ctime.toString()));
+            }
+            if (stime != null) {
+                request.socketTimeout(Integer.valueOf(stime.toString()));
+            }
+        }
     }
 
     public static String doExe(String templatePathNames) {
@@ -64,7 +74,11 @@ public abstract class RestUtils {
         String s = FkUtils.processByPathName(templatePathNames, args);
         return doExeString(s, args, responseHeader);
     }
-
+    
+    public static String doExeString(String templateContent, Map<String, Object> args) {
+        return doExeString(templateContent, args, new HashMap<String, String>());
+    }
+    
     @SuppressWarnings("unchecked")
     public static String doExeString(String templateContent, Map<String, Object> args, Map<String, String> responseHeader) {
         logger.info("### doExe args" + args);
@@ -127,8 +141,9 @@ public abstract class RestUtils {
                     }
                 }
                 Request request = Request.Get(url);
-                addRestComm(request, args);
-                response = request.execute();
+                addRestComm(request, req, args);
+                //response = request.execute();
+                response =  HttpsUtils.exec(request, req);
             } else {
                 if (contentType.contains("form")) {
                     NameValuePair[] data = new NameValuePair[map.size()];
@@ -140,8 +155,9 @@ public abstract class RestUtils {
                         index++;
                     }
                     Request request = Request.Post(req.getUrl()).bodyForm(data);
-                    addRestComm(request, args);
-                    response = request.execute();
+                    addRestComm(request, req, args);
+                    //response = request.execute();
+                    response =  HttpsUtils.exec(request, req);
                 } else {
                     HttpEntity entity = null;
                     String fileParams = req.getFileParams();
@@ -187,8 +203,9 @@ public abstract class RestUtils {
                     if (request == null) {
                         throw new RuntimeException("method is not support  ");
                     }
-                    addRestComm(request, args);
-                    response = request.execute();
+                    addRestComm(request, req, args);
+                    //response = request.execute();
+                    response =  HttpsUtils.exec(request, req);
                 }
             }
             if (response == null) {
@@ -198,9 +215,12 @@ public abstract class RestUtils {
                 // String result = response.returnContent().asString(Charset.forName(req.getChareset()));
                 HttpResponse returnResponse = response.returnResponse();
                 logger.info("HttpResponse status:" + returnResponse.getStatusLine());
-                //返回头信息
+                // 返回头信息
                 responseHeader.putAll(getResponseHeader(returnResponse));
                 HttpEntity entity = returnResponse.getEntity();
+                if(entity==null){
+                    return null;
+                }
                 String result = EntityUtils.toString(entity, req.getChareset());
                 logger.info(result);
                 String splitKey = req.getResponseSplitKey();
@@ -314,134 +334,5 @@ public abstract class RestUtils {
             levelStr.append("\t");
         }
         return levelStr.toString();
-    }
-}
-
-class RestRequest {
-    private String url;
-    private String method;
-    private Boolean async = false;
-    private String chareset = "UTF-8";
-    private String requestBody;
-    private String contentType = "application/json";
-    /**
-     * 回调方法
-     */
-    private Class<? extends ResponseHandler<Object>> callblack;
-    /**
-     * 回调构造方法传参数
-     */
-    private Object[] callConstructors;
-    private String fileParams;
-    private Class<?> responseClassType;
-    private String responseSplitKey;
-    private String responseType = "json";
-    private Map<String, Object> header;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public Boolean getAsync() {
-        return async;
-    }
-
-    public void setAsync(Boolean async) {
-        this.async = async;
-    }
-
-    public String getRequestBody() {
-        if (requestBody == null) {
-            return "{}";
-        }
-        return requestBody.trim();
-    }
-
-    public void setRequestBody(String requestBody) {
-        this.requestBody = requestBody;
-    }
-
-    public Class<? extends ResponseHandler<Object>> getCallblack() {
-        return callblack;
-    }
-
-    public void setCallblack(Class<? extends ResponseHandler<Object>> callblack) {
-        this.callblack = callblack;
-    }
-
-    public Object[] getCallConstructors() {
-        return callConstructors;
-    }
-
-    public void setCallConstructors(Object[] callConstructors) {
-        this.callConstructors = callConstructors;
-    }
-
-    public String getChareset() {
-        return chareset;
-    }
-
-    public void setChareset(String chareset) {
-        this.chareset = chareset;
-    }
-
-    public Class<?> getResponseClassType() {
-        return responseClassType;
-    }
-
-    public void setResponseClassType(Class<?> responseClassType) {
-        this.responseClassType = responseClassType;
-    }
-
-    public String getResponseSplitKey() {
-        return responseSplitKey;
-    }
-
-    public void setResponseSplitKey(String responseSplitKey) {
-        this.responseSplitKey = responseSplitKey;
-    }
-
-    public String getResponseType() {
-        return responseType;
-    }
-
-    public void setResponseType(String responseType) {
-        this.responseType = responseType;
-    }
-
-    public String getFileParams() {
-        return fileParams;
-    }
-
-    public void setFileParams(String fileParams) {
-        this.fileParams = fileParams;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public Map<String, Object> getHeader() {
-        return this.header;
-    }
-
-    public void setHeader(Map<String, Object> header) {
-        this.header = header;
     }
 }

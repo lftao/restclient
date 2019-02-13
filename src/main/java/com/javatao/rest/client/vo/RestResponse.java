@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ApiResponse implements Serializable {
+public class RestResponse implements Serializable {
     private static final long serialVersionUID = 4876224394091925143L;
     private String body;
     private Map<String, String> header = new HashMap<>();

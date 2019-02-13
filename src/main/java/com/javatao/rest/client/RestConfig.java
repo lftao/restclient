@@ -19,7 +19,7 @@ public class RestConfig {
      *            接口类
      */
     public static void init(Class<?> apiClass) {
-        init(apiClass, "/");
+        init(apiClass, "/",null);
     }
 
     /**
@@ -60,6 +60,19 @@ public class RestConfig {
      *            模板目录
      */
     public static void init(Class<?> apiClass, String basedir) {
+        init(apiClass, basedir, null);
+    }
+    /**
+     * 初始化参数 ;
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板目录
+     * @param instance
+     *            实例对象
+     */
+    public static void init(Class<?> apiClass, String basedir,Object instance) {
         Field[] fields = apiClass.getDeclaredFields();
         Set<Class<?>> ifacesClass = new HashSet<>();
         Set<Field> fieldIface = new HashSet<>();
@@ -76,7 +89,8 @@ public class RestConfig {
         Object proxy = Proxy.newProxyInstance(RestConfig.class.getClassLoader(), ifacesClass.toArray(new Class<?>[] {}), new IfaceProxy(basedir));
         for (Field field : fieldIface) {
             try {
-                field.set(null, proxy);
+                field.setAccessible(true);
+                field.set(instance, proxy);
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
             }
