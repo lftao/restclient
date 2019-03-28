@@ -34,15 +34,12 @@ public class IfaceProxy implements InvocationHandler, Serializable {
             String templateName = getTemplateName(method);
             Map<String, Object> paramsMap = changeToMap(method, args);
             Map<String, String> responseHeader = new HashMap<>();
-            String resutl = RestUtils.doExe(templateName, paramsMap,responseHeader);
-            if (isBlank(resutl)) {
-                return null;
-            }
+            String resutl = RestUtils.doExe(templateName, paramsMap, responseHeader);
             Class<?> returnType = method.getReturnType();
-            if (returnType.isAssignableFrom(String.class)) {
+            if (returnType == null || returnType.isAssignableFrom(String.class)) {
                 return resutl;
             }
-            if(returnType.isAssignableFrom(RestResponse.class)){
+            if (returnType.isAssignableFrom(RestResponse.class)) {
                 RestResponse api = new RestResponse();
                 api.setBody(resutl);
                 api.setHeader(responseHeader);
