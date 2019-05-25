@@ -10,6 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.alibaba.fastjson.JSON;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapper;
@@ -42,9 +44,24 @@ public final class FkUtils {
             configuration.setNumberFormat("###");
             configuration.setLocale(Locale.CHINESE);
             configuration.setLocalizedLookup(false);
+            configuration.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+            // 注册变量
+            BeansWrapper wrapper = (BeansWrapper) configuration.getObjectWrapper();
+            TemplateHashModel model = wrapper.getStaticModels();
+            // 注册fastjson-工具
+            configuration.setSharedVariable("fastjson", model.get(JSON.class.getName()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 获取Configuration
+     * 
+     * @return Configuration
+     */
+    public static Configuration getConfiguration() {
+        return configuration;
     }
 
     /**
@@ -56,7 +73,7 @@ public final class FkUtils {
     public static void include(String include) {
         try {
             Class<?> class1 = FkUtils.class;
-            String path = include + "/include/";
+            String path = include + "/_include/";
             URL resource = class1.getResource(path);
             if (resource == null) {
                 return;

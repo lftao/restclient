@@ -88,7 +88,7 @@ public abstract class RestUtils {
             if (contentType.contains("xml")) {
                 logger.info("### doExe " + templateContent);
             } else {
-                logger.info("### doExe " + jsonFormat(templateContent));
+                logger.info("### doExe " + JSON.toJSONString(req));
             }
             ResponseHandler<Object> handler = null;
             if (req.getCallblack() != null) {
@@ -274,65 +274,5 @@ public abstract class RestUtils {
             }
         }
         return responseHeader;
-    }
-
-    /**
-     * 得到格式化json数据
-     * 
-     * @param jsonStr
-     *            字符串
-     * @return 格式化后字符
-     */
-    public static String jsonFormat(String jsonStr) {
-        int level = 0;
-        StringBuilder jsonForMatStr = new StringBuilder();
-        jsonStr = jsonStr.replaceAll("\n|\t|\r| ", "").replace(",]", "]").replace(",}", "}").trim();
-        int size = jsonStr.length();
-        for (int i = 0; i < size; i++) {
-            char c = jsonStr.charAt(i);
-            char n = ' ';
-            if (i < size - 1) {
-                n = jsonStr.charAt(i + 1);
-            }
-            if (level > 0 && '\n' == jsonForMatStr.charAt(jsonForMatStr.length() - 1)) {
-                jsonForMatStr.append(getLevelStr(level));
-            }
-            switch (c) {
-                case '{':
-                case '[':
-                    if (n == '[' || n == '{') {
-                        jsonForMatStr.append(c);
-                    } else {
-                        jsonForMatStr.append(c + "\n");
-                    }
-                    level++;
-                    break;
-                case ',':
-                    jsonForMatStr.append(c);
-                    if (n != '{' && n != '[') {
-                        jsonForMatStr.append("\n");
-                    }
-                    break;
-                case '}':
-                case ']':
-                    jsonForMatStr.append("\n");
-                    level--;
-                    jsonForMatStr.append(getLevelStr(level));
-                    jsonForMatStr.append(c);
-                    break;
-                default:
-                    jsonForMatStr.append(c);
-                    break;
-            }
-        }
-        return jsonForMatStr.toString();
-    }
-
-    private static String getLevelStr(int level) {
-        StringBuffer levelStr = new StringBuffer();
-        for (int levelI = 0; levelI < level; levelI++) {
-            levelStr.append("\t");
-        }
-        return levelStr.toString();
     }
 }

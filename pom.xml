@@ -49,7 +49,7 @@
         <freemarker.version>2.3.23</freemarker.version>
         <java.version>1.7</java.version>
         <fastjson.version>1.2.32</fastjson.version>
-        <project.version>0.0.3</project.version>
+        <project.version>0.1.1</project.version>
     </properties>
 
     <dependencies>

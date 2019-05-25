@@ -27,14 +27,25 @@ public class IfaceProxy implements InvocationHandler, Serializable {
     private static final Log logger = LogFactory.getLog(IfaceProxy.class);
     private static final long serialVersionUID = -707292751479136782L;
     private String basedir = "";
+    private DoInterceptors doInterceptors;
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         try {
             String templateName = getTemplateName(method);
             Map<String, Object> paramsMap = changeToMap(method, args);
+            // 前置参数处理
+            Object out = doInterceptors.before(paramsMap);
+            if (out != null) {
+                return out;
+            }
             Map<String, String> responseHeader = new HashMap<>();
             String resutl = RestUtils.doExe(templateName, paramsMap, responseHeader);
+            // 后置参数处理
+            Object after = doInterceptors.after(resutl, responseHeader);
+            if (after != null) {
+                return after;
+            }
             Class<?> returnType = method.getReturnType();
             if (returnType == null || returnType.isAssignableFrom(String.class)) {
                 return resutl;
@@ -45,7 +56,8 @@ public class IfaceProxy implements InvocationHandler, Serializable {
                 api.setHeader(responseHeader);
                 return api;
             }
-            return JSON.parseObject(resutl, returnType);
+            Object object = JSON.parseObject(resutl, returnType);
+            return doInterceptors.finalReturn(object);
         } catch (Throwable t) {
             logger.error(t);
             throw ExceptionUtil.unwrapThrowable(t);
@@ -117,15 +129,19 @@ public class IfaceProxy implements InvocationHandler, Serializable {
      * @param basedir
      *            目录
      */
-    public IfaceProxy(String basedir) {
+    public IfaceProxy(String basedir, DoInterceptors doInterceptors) {
         super();
-        logger.info("init RestProxy basedir:" + basedir);
+        /* logger.info("init RestProxy basedir:" + basedir); */
         if (basedir != null) {
             if (!basedir.endsWith("/")) {
                 basedir = basedir.concat("/");
             }
         }
+        if (doInterceptors == null) {
+            doInterceptors = new DoAdapter();
+        }
         this.basedir = basedir;
+        this.doInterceptors = doInterceptors;
         // 添加通用文件
         FkUtils.include(basedir);
     }
