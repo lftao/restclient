@@ -72,7 +72,53 @@ public class RestConfig {
      * @param instance
      *            实例对象
      */
+    public static void init(Class<?> apiClass, String basedir, Object instance) {
+        init(instance.getClass(), basedir, instance, null);
+    }
+
+    /**
+     * 初始化参数 ;
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板目录
+     * @param interceptors
+     *            接口
+     */
     public static void init(Class<?> apiClass, String basedir, DoInterceptors interceptors) {
+        init(apiClass, basedir, null, interceptors);
+    }
+
+    /**
+     * 初始化参数 ;
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板目录
+     * @param instance
+     *            实例对象
+     * @param interceptors
+     *            接口
+     */
+    public static void init(Object instance, String basedir, DoInterceptors interceptors) {
+        init(instance.getClass(), basedir, instance, interceptors);
+    }
+
+    /**
+     * 初始化参数 ;
+     * 
+     * @param apiClass
+     *            接口类
+     * @param basedir
+     *            模板目录
+     * @param instance
+     *            实例对象
+     * @param interceptors
+     *            接口
+     */
+    public static void init(Class<?> apiClass, String basedir, Object instance, DoInterceptors interceptors) {
         Field[] fields = apiClass.getDeclaredFields();
         for (Field field : fields) {
             Class<?> type = field.getType();
@@ -82,7 +128,7 @@ public class RestConfig {
                     IfaceProxy ifaceProxy = new IfaceProxy(basedir, interceptors);
                     Object proxy = Proxy.newProxyInstance(RestConfig.class.getClassLoader(), new Class<?>[] { type }, ifaceProxy);
                     field.setAccessible(true);
-                    field.set(null, proxy);
+                    field.set(instance, proxy);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
