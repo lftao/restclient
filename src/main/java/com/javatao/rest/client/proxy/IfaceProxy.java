@@ -46,18 +46,23 @@ public class IfaceProxy implements InvocationHandler, Serializable {
             if (after != null) {
                 return after;
             }
+            // ----
             Class<?> returnType = method.getReturnType();
             if (returnType == null || returnType.isAssignableFrom(String.class)) {
                 return resutl;
             }
-            if (returnType.isAssignableFrom(RestResponse.class)) {
-                RestResponse api = new RestResponse();
-                api.setBody(resutl);
-                api.setHeader(responseHeader);
-                return api;
-            }
             Object object = JSON.parseObject(resutl, returnType);
-            return doInterceptors.finalReturn(object);
+            if (object instanceof RestResponse) {
+                RestResponse response = (RestResponse) object;
+                response.setBody(resutl);
+                response.setHeader(responseHeader);
+            }
+            if (returnType.isAssignableFrom(RestResponse.class)) {
+                object = new RestResponse();
+                ((RestResponse) object).setBody(resutl);
+                ((RestResponse) object).setHeader(responseHeader);
+            }
+            return doInterceptors.finalReturn(object, proxy, method, args);
         } catch (Throwable t) {
             logger.error(t);
             throw ExceptionUtil.unwrapThrowable(t);
@@ -128,6 +133,8 @@ public class IfaceProxy implements InvocationHandler, Serializable {
      * 
      * @param basedir
      *            目录
+     * @param doInterceptors
+     *            拦截器
      */
     public IfaceProxy(String basedir, DoInterceptors doInterceptors) {
         super();

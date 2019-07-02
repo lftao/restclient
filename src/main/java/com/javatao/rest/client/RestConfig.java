@@ -26,6 +26,8 @@ public class RestConfig {
      * 
      * @param apiClass
      *            接口类
+     * @param <T>
+     *            接口类泛型
      * @return T 实例
      */
     public static <T> T getBean(Class<T> apiClass) {
@@ -39,6 +41,8 @@ public class RestConfig {
      *            接口类
      * @param basedir
      *            模板路径
+     * @param <T>
+     *            接口类泛型
      * @return T 实例
      */
     @SuppressWarnings("unchecked")
@@ -93,8 +97,6 @@ public class RestConfig {
     /**
      * 初始化参数 ;
      * 
-     * @param apiClass
-     *            接口类
      * @param basedir
      *            模板目录
      * @param instance

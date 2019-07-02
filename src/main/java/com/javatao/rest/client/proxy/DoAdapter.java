@@ -1,5 +1,6 @@
 package com.javatao.rest.client.proxy;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 public class DoAdapter implements DoInterceptors {
@@ -14,7 +15,7 @@ public class DoAdapter implements DoInterceptors {
     }
 
     @Override
-    public Object finalReturn(Object object) {
-        return object;
+    public Object finalReturn(Object result, Object proxy, Method method, Object[] args) {
+        return result;
     }
 }
