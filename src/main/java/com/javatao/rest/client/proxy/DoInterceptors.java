@@ -17,7 +17,7 @@ public interface DoInterceptors {
      * 
      * @param resutl
      *            结果
-     * @param header
+     * @param headers
      *            头信息
      * @return 对象
      */

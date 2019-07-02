@@ -128,6 +128,8 @@ public class IfaceProxy implements InvocationHandler, Serializable {
      * 
      * @param basedir
      *            目录
+     * @param doInterceptors
+     *            拦截器
      */
     public IfaceProxy(String basedir, DoInterceptors doInterceptors) {
         super();
