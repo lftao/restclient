@@ -49,7 +49,7 @@ public final class FkUtils {
             BeansWrapper wrapper = (BeansWrapper) configuration.getObjectWrapper();
             TemplateHashModel model = wrapper.getStaticModels();
             // 注册fastjson-工具
-            configuration.setSharedVariable("fastjson", model.get(JSON.class.getName()));
+            configuration.setSharedVariable("JSON", model.get(JSON.class.getName()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
