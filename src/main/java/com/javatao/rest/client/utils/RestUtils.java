@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
@@ -191,13 +192,17 @@ public abstract class RestUtils {
                         entity = new StringEntity(requestBody, ContentType.create(contentType, req.getChareset()));
                     }
                     Request request = null;
-                    Method methodPoxy = Request.class.getMethod(method, String.class);
+                    Method methodPoxy = RequestFactory.class.getMethod(method, String.class);
                     Object invoke = methodPoxy.invoke(null, url);
                     if (invoke instanceof Request) {
                         request = (Request) invoke;
                         long length = entity.getContentLength();
                         if (length > 2) {
-                            request.body(entity);
+                            if (request instanceof HttpEntityEnclosingRequest) {
+                                request.body(entity);
+                            }else{
+                                request.bodyStream(entity.getContent(),ContentType.create(contentType, req.getChareset()));
+                            }
                         }
                     }
                     if (request == null) {

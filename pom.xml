@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.lftao</groupId>
     <artifactId>restclient</artifactId>
-    <version>${project.version}</version>
+    <version>0.1.5</version>
     <name>restclient</name>
     <description>Restclient 模板化 接口 </description>
     <url>https://github.com/lftao/restclient</url>
@@ -28,7 +28,7 @@
             scm:git:https://github.com/lftao/restclient.git
         </developerConnection>
         <url>https://github.com/lftao/restclient</url>
-        <tag>0.0.3</tag>
+        <tag>0.1.5</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
@@ -49,7 +49,7 @@
         <freemarker.version>2.3.23</freemarker.version>
         <java.version>1.7</java.version>
         <fastjson.version>1.2.32</fastjson.version>
-        <project.version>0.1.3</project.version>
+        <project.version>0.1.5</project.version>
     </properties>
 
     <dependencies>
