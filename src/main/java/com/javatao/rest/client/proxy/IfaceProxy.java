@@ -35,14 +35,14 @@ public class IfaceProxy implements InvocationHandler, Serializable {
             String templateName = getTemplateName(method);
             Map<String, Object> paramsMap = changeToMap(method, args);
             // 前置参数处理
-            Object out = doInterceptors.before(paramsMap);
+            Object out = doInterceptors.before(proxy, method,paramsMap);
             if (out != null) {
                 return out;
             }
             Map<String, String> responseHeader = new HashMap<>();
             String resutl = RestUtils.doExe(templateName, paramsMap, responseHeader);
             // 后置参数处理
-            Object after = doInterceptors.after(resutl, responseHeader);
+            Object after = doInterceptors.after(proxy, method,resutl, responseHeader);
             if (after != null) {
                 return after;
             }

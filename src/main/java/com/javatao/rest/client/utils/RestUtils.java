@@ -151,7 +151,8 @@ public abstract class RestUtils {
                     int index = 0;
                     for (Object key : map.keySet()) {
                         Object val = map.get(key);
-                        String value = URLEncoder.encode(val.toString(), "utf-8");
+                        //String value = URLEncoder.encode(val.toString(), "utf-8");
+                        String value = val.toString();
                         data[index] = new BasicNameValuePair(key.toString(), value);
                         index++;
                     }
